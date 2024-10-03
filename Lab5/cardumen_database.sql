@@ -1,13 +1,13 @@
 create table if not exists superheores.cardumen_superhero(
 	id serial primary key,
 	name varchar(255) not null,
-	height integer,
-	weight integer
+	height integer not null, 
+	weight integer not null
 );
 
 create table if not exists superheores.cardumen_character(
 	superhero_id serial primary key,
-	biography_name varchar(255),
+	biography_name varchar(255) not null,
 	foreign key (superhero_id) references cardumen_superhero(id)
 	
 );
