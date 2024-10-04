@@ -12,8 +12,18 @@ conn = psycopg2.connect ( host ="cc3201.dcc.uchile.cl",
 
 cur = conn.cursor()
 
+# Borra todos los datos que ya existan en las tablas
+cur.execute("truncate table cardumen_superhero restart identity cascade")
+cur.execute("truncate table cardumen_character restart identity cascade")
+cur.execute("truncate table cardumen_alterego restart identity cascade")
+cur.execute("truncate table cardumen_workOccupation restart identity cascade")
+cur.execute("truncate table cardumen_superheroe_alterego restart identity cascade")
+cur.execute("truncate table anime_tag restart identity cascade")
+
 alter_egos_cache = {}
 work_occupation_cache = {}
+shae_cache = {} #cache relacion superheroe alterego
+shwo_cache={}
 
 with open('data.csv') as cvsfile:
     reader = csv.reader(cvsfile, delimiter=',', quotechar='"') 
@@ -60,21 +70,42 @@ with open('data.csv') as cvsfile:
 
         ## INSERTAMOS EN LA TABLA IMAGINARIA
         # i. Inserte el superhero, obteniendo su id.
-        cur.execute("INSERT INTO superheores.cardumen_superhero(name, height, weight) VALUES (%s, %s, %s) RETURNING id", [superheroe, height, weight])
+        cur.execute("INSERT INTO cardumen_superhero(name, height, weight) VALUES (%s, %s, %s) RETURNING id", [superheroe, height, weight])
         superheroe_id = cur.fetchone()[0]
 
         # ii. Inserte el character usando el id del punto anterior.
         if full_name is not None: # si es character
-            cur.execute("INSERT INTO superheores.cardumen_character(superheroe_id, biography_name) VALUES (%s, %s)", [superheroe_id, full_name])
+            cur.execute("INSERT INTO cardumen_character(superheroe_id, biography_name) VALUES (%s, %s)", [superheroe_id, full_name])
         
         # iii. Para cada alter ego (asuma que están separados por “,” o “;”)
             # A. Elimine espacios blancos al comienzo y al final, y comillas dobles.
             # B. Busque si ya existe el alter ego para ese superhéroe. Si no existe, insertelo.
+        if alter_egos is not None:
+            for alter_ego in alter_egos:
+                alter_egos_id = alter_egos_cache[alter_ego] if alter_ego in alter_egos_cache else None
+                if not alter_egos_id:
+                    cur.execute("insert into alter_ego (name) values (%s) returning id", [alter_ego])
+                    alter_egos_id = cur.fetchone()[0]
+                    alter_egos_cache[alter_ego] = alter_egos_id
+                if not (superheroe_id,alter_egos_id) in shae_cache:
+                    cur.execute("insert into cardumen_superheroe_alterego (superheroe_id, alteregos_id) values (%s, %s)", [superheroe_id, alter_egos_id])
+                    shae_cache[(superheroe_id, alter_egos_id)] = True
         
         # iv. Para cada ocupación/oficio (asuma que estan separadas por “,” o “;”)
             # A. Elimine espacios blancos al comienzo y al final, y comillas dobles.
             # B. Seleccione el id de la ocupaci´on dado el nombre de esta. Si no existe, cr´eala.
             # C. Busque si ya existe un elemento en la tabla intermedia entre superh´eroe y ocupaci´on. Si no existe insertela.
-
+        if work_occupation is not None:
+            for i in work_occupation:
+                work_occupation_id = work_occupation_cache[i] if i in work_occupation_cache else None
+                if not work_occupation_id:
+                    cur.execute("insert into cardumen_workOccupation (name) values (%s) returning id", [i])
+                    work_occupation_id = cur.fetchone()[0]
+                    work_occupation_cache[i] = work_occupation_id
+                if not (superheroe_id,work_occupation_id) in shwo_cache:
+                    cur.execute("insert into cardumen_superheroe_workOcupation (superheroe_id, workOcupation_id) values (%s, %s)", [superheroe_id, work_occupation_id])
+                    shwo_cache[(superheroe_id, work_occupation_id)] = True
+    
+    conn.commit()
             
 

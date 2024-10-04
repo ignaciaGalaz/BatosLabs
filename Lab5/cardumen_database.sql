@@ -30,10 +30,10 @@ create table if not exists superheores.cardumen_superheroe_alterego(
     foreign key (alterego_id) references cardumen_alterego(id)
 )
 
-create table if not exists superheores.cardumen_superheroe_workOcupation(
+create table if not exists superheores.cardumen_superheroe_workOccupation(
     superhero_id bigint not null,
-    workOcupation_id bigint not null,
-    primary key (superhero_id, workOcupation_id),
+    workOccupation_id bigint not null,
+    primary key (superhero_id, workOccupation_id),
     foreign key (superhero_id) references cardumen_superhero(id),
-    foreign key (workOcupation_id) references cardumen_workOccupation(id)
+    foreign key (workOccupation_id) references cardumen_workOccupation(id)
 )
