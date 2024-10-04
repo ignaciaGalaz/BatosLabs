@@ -88,19 +88,5 @@ with open('data.csv') as cvsfile:
             # A. Elimine espacios blancos al comienzo y al final, y comillas dobles.
             # B. Seleccione el id de la ocupaci´on dado el nombre de esta. Si no existe, cr´eala.
             # C. Busque si ya existe un elemento en la tabla intermedia entre superh´eroe y ocupaci´on. Si no existe insertela
-            
-            tags = [r.strip() for r in row[7].split(",")]
-            for tag in tags:
-                if not tag:
-                    continue
-                tag_id = tag_cache[tag] if tag in tag_cache else None
-                if not tag_id:
-                    cur.execute("insert into tag (name) values (%s) returning id", [tag])
-                    tag_id = cur.fetchone()[0]
-                    tag_cache[tag] = tag_id
-                
-                #creamos la relacion entre anime y tag
-                if not (anime_id, tag_id) in at_cache:
-                    cur.execute("insert into anime_tag (anime_id, tag_id) values (%s, %s)", [anime_id, tag_id])
-                    at_cache[(anime_id, tag_id)] = True
+        
 
