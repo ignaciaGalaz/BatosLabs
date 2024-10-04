@@ -3,7 +3,6 @@ import psycopg2.extras
 import csv
 import re
 
-
 conn = psycopg2.connect ( host ="cc3201.dcc.uchile.cl",
                           database ="cc3201",
                           user ="cc3201",
@@ -22,8 +21,8 @@ cur.execute("truncate table cardumen_superhero_workoccupation restart identity c
 
 alteregos_cache = {}
 work_occupation_cache = {}
-shae_cache = {} #cache relacion superhero alterego
-shwo_cache = {}
+shae_cache = {} #superhero alterego relation cache
+shwo_cache = {} # superhero work occupation relation cache
 
 with open('data.csv') as cvsfile:
     reader = csv.reader(cvsfile, delimiter=',', quotechar='"') 
@@ -38,25 +37,26 @@ with open('data.csv') as cvsfile:
 
         print(i-1, end=" ")
 
-        # PUSE NONE EN CUALQUIER DATO QUE NO SE ENTREGUE
+        # OBTENEMOS LOS DATOS DEL CSV
+        # None en cualquier dato que no se entregue
 
-        superhero = row[1] #nombre de superhero
-        full_name = row[8].strip() if row[8]!="" else None #nombre real
-        
-        # pueden estar separados por comas o punto y coma: se usan expresiones regulares
-        # .replace('"', '') quita las dobles comillas
+        # Nombre de superhero
+        superhero = row[1] 
+        # Nombre real
+        full_name = row[8].strip() if row[8]!="" else None 
+        # Lista de alteregos
         alteregos = [s.strip() for s in re.split(r'[;,]', row[9].replace('"', ''))] if row[9] != "No alter egos found." else None
         
-        # (!!) pesos y alturas con valor 0
-        height = row[18].strip() if row[18]!='' else "0" # altura en centimetros, FALTA CONSIDERAR VACIOS
-        weight = row[20].strip() 
-        if height.count("meters") == 1:
+        # Altura en centimetros
+        height = row[18].strip() if row[18]!='' else "0"
+        if height.count("meters") == 1: # Pasa metros a centímetros
             height = height.replace(' meters', '').strip()
-            print("alturaaa:", height, ".")
             height = str(int(float(height))*100)
         else:
             height = height.replace(' cm', '')
         
+        # Peso en kg
+        weight = row[20].strip() 
         if weight.count("tons") == 1:
             weight = weight.replace(' tons', '').replace(',','')
             weight = str(int(weight)*1000)
@@ -64,11 +64,11 @@ with open('data.csv') as cvsfile:
             weight = weight.replace(' kg', '')
         
         # hace lo mismo que alter egos
-        # no me fijé si los que no tienen alter ego pueden tenerl null en vez de '-'
         # algunos están escritos como '(former) trabajo' y otros como 'former trabajo'
+        # Ocupación
         work_occupation = [s.strip().lower() for s in re.split(r'[;,]', row[23].replace('"', ''))] if row[23] != "-" else None
 
-        #----------para comprobar que está funcionando-----------
+        #----------para comprobar que está funcionando----------------------
         print(f"name: {superhero}, biography name: {full_name}")
 
         print("   alteregos:", alteregos)
@@ -76,19 +76,19 @@ with open('data.csv') as cvsfile:
         print("   altura:", height)
         print("   work occupation:", work_occupation)
         print()
+        #-------------------------------------------------------------------
 
-        ## INSERTAMOS EN LA TABLA IMAGINARIA
-        # i. Inserte el superhero, obteniendo su id.
+        ## INSERTAMOS EN LA TABLA
+
+        # Insertamos el superheroe
         cur.execute("INSERT INTO cardumen_superhero(name, height, weight) VALUES (%s, %s, %s) RETURNING id", [superhero, height, weight])
         superhero_id = cur.fetchone()[0]
 
-        # ii. Inserte el character usando el id del punto anterior.
+        # Insertamos un superheroe si es character
         if full_name is not None: # si es character
             cur.execute("INSERT INTO cardumen_character(superhero_id, biography_name) VALUES (%s, %s)", [superhero_id, full_name])
         
-        # iii. Para cada alter ego (asuma que están separados por “,” o “;”)
-            # A. Elimine espacios blancos al comienzo y al final, y comillas dobles.
-            # B. Busque si ya existe el alter ego para ese superhéroe. Si no existe, insertelo.
+        # Insertamos los alteregos si no existen en la tabla
         if alteregos is not None:
             for alterego in alteregos:
                 alteregos_id = alteregos_cache[alterego] if alterego in alteregos_cache else None
@@ -100,10 +100,7 @@ with open('data.csv') as cvsfile:
                     cur.execute("insert into cardumen_superhero_alterego (superhero_id, alterego_id) values (%s, %s)", [superhero_id, alteregos_id])
                     shae_cache[(superhero_id, alteregos_id)] = True
         
-        # iv. Para cada ocupación/oficio (asuma que estan separadas por “,” o “;”)
-            # A. Elimine espacios blancos al comienzo y al final, y comillas dobles.
-            # B. Seleccione el id de la ocupaci´on dado el nombre de esta. Si no existe, cr´eala.
-            # C. Busque si ya existe un elemento en la tabla intermedia entre superh´eroe y ocupaci´on. Si no existe insertela.
+        # Insertamos las ocupaciones si no existen en la tabla
         if work_occupation is not None:
             for _i in work_occupation:
                 work_occupation_id = work_occupation_cache[_i] if _i in work_occupation_cache else None
