@@ -33,8 +33,8 @@ with open('data.csv') as cvsfile:
         i+=1
         if i==1:
             continue
-        if i>31:
-            break
+        #if i>35:
+        #    break
 
         print(i-1, end=" ")
 
@@ -47,25 +47,21 @@ with open('data.csv') as cvsfile:
         # .replace('"', '') quita las dobles comillas
         alteregos = [s.strip() for s in re.split(r'[;,]', row[9].replace('"', ''))] if row[9] != "No alter egos found." else None
         
-
-        #appearance__height__001 = row[17]  # altura en pies
-        #appearance__weight__001 = row[19]  # peso en libras
-        # no sé si es necesario castear a int (creo que si)
-        # (!!) no considera los casos en que se dan metros en vez de cm -> ej: fila 33, fila 288
         # (!!) pesos y alturas con valor 0
-        height = row[18].strip() # altura en centimetros(
-        weight = row[20].strip()
+        height = row[18].strip() # altura en centimetros, FALTA CONSIDERAR VACIOS
+        weight = row[20].strip() 
         if height.count("meters") == 1:
-            height.replace(' meters', '')
-            height = str(int(height)*100)
+            height = height.replace(' meters', '').strip()
+            print("alturaaa:", height, ".")
+            height = str(int(float(height))*100)
         else:
-            height.replace(' cm', '')
+            height = height.replace(' cm', '')
         
         if weight.count("tons") == 1:
-            weight.replace(' tons', '')
+            weight = weight.replace(' tons', '')
             weight = str(int(weight)*1000)
         else:
-            weight.replace(' kg', '')
+            weight = weight.replace(' kg', '')
         
         # hace lo mismo que alter egos
         # no me fijé si los que no tienen alter ego pueden tenerl null en vez de '-'
