@@ -22,7 +22,7 @@ create table if not exists superheores.cardumen_workOccupation(
 	name varchar(255)
 );
 
-create table if not exists superheores.cardumen_superheroe_alterego(
+create table if not exists superheores.cardumen_superhero_alterego(
     superhero_id bigint not null,
     alterego_id bigint not null,
     primary key (superhero_id, alterego_id),
@@ -30,7 +30,7 @@ create table if not exists superheores.cardumen_superheroe_alterego(
     foreign key (alterego_id) references cardumen_alterego(id)
 )
 
-create table if not exists superheores.cardumen_superheroe_workOccupation(
+create table if not exists superheores.cardumen_superhero_workOccupation(
     superhero_id bigint not null,
     workOccupation_id bigint not null,
     primary key (superhero_id, workOccupation_id),
