@@ -18,9 +18,9 @@ cur.execute("truncate table cardumen_character restart identity cascade")
 cur.execute("truncate table cardumen_alterego restart identity cascade")
 cur.execute("truncate table cardumen_workOccupation restart identity cascade")
 cur.execute("truncate table cardumen_superhero_alterego restart identity cascade")
-cur.execute("truncate table cardumen_superhero_workOcupation restart identity cascade")
+cur.execute("truncate table cardumen_superhero_workoccupation restart identity cascade")
 
-alter_egos_cache = {}
+alteregos_cache = {}
 work_occupation_cache = {}
 shae_cache = {} #cache relacion superhero alterego
 shwo_cache = {}
@@ -45,17 +45,27 @@ with open('data.csv') as cvsfile:
         
         # pueden estar separados por comas o punto y coma: se usan expresiones regulares
         # .replace('"', '') quita las dobles comillas
-        alter_egos = [s.strip() for s in re.split(r'[;,]', row[9].replace('"', ''))] if row[9] != "No alter egos found." else None
+        alteregos = [s.strip() for s in re.split(r'[;,]', row[9].replace('"', ''))] if row[9] != "No alter egos found." else None
         
 
         #appearance__height__001 = row[17]  # altura en pies
         #appearance__weight__001 = row[19]  # peso en libras
         # no sé si es necesario castear a int (creo que si)
         # (!!) no considera los casos en que se dan metros en vez de cm -> ej: fila 33, fila 288
-        height = row[18].strip().replace(' cm', '') # altura en centimetros
-        weight = row[20].strip().replace(' kg', '') # peso en kg
-
-
+        # (!!) pesos y alturas con valor 0
+        height = row[18].strip() # altura en centimetros(
+        weight = row[20].strip()
+        if height.count("meters") == 1:
+            height.replace(' meters', '')
+            height = str(int(height)*100)
+        else:
+            height.replace(' cm', '')
+        
+        if weight.count("tons") == 1:
+            weight.replace(' tons', '')
+            weight = str(int(weight)*1000)
+        else:
+            weight.replace(' kg', '')
         
         # hace lo mismo que alter egos
         # no me fijé si los que no tienen alter ego pueden tenerl null en vez de '-'
@@ -65,10 +75,10 @@ with open('data.csv') as cvsfile:
         #----------para comprobar que está funcionando-----------
         print(f"name: {superhero}, biography name: {full_name}")
 
-        print("   alteregos:", alter_egos)
+        print("   alteregos:", alteregos)
         print("   peso:", weight)
         print("   altura:", height)
-        print("   work ocupation:", work_occupation)
+        print("   work occupation:", work_occupation)
 
         print(type(weight)==str)
         print(type(height)==str)
@@ -85,16 +95,16 @@ with open('data.csv') as cvsfile:
         # iii. Para cada alter ego (asuma que están separados por “,” o “;”)
             # A. Elimine espacios blancos al comienzo y al final, y comillas dobles.
             # B. Busque si ya existe el alter ego para ese superhéroe. Si no existe, insertelo.
-        if alter_egos is not None:
-            for alter_ego in alter_egos:
-                alter_egos_id = alter_egos_cache[alter_ego] if alter_ego in alter_egos_cache else None
-                if not alter_egos_id:#agregar vacios
-                    cur.execute("insert into cardumen_alterego (name) values (%s) returning id", [alter_ego])
-                    alter_egos_id = cur.fetchone()[0]
-                    alter_egos_cache[alter_ego] = alter_egos_id
-                if not (superhero_id,alter_egos_id) in shae_cache:
-                    cur.execute("insert into cardumen_superhero_alterego (superhero_id, alteregos_id) values (%s, %s)", [superhero_id, alter_egos_id])
-                    shae_cache[(superhero_id, alter_egos_id)] = True
+        if alteregos is not None:
+            for alterego in alteregos:
+                alteregos_id = alteregos_cache[alterego] if alterego in alteregos_cache else None
+                if not alteregos_id:#agregar vacios
+                    cur.execute("insert into cardumen_alterego (name) values (%s) returning id", [alterego])
+                    alteregos_id = cur.fetchone()[0]
+                    alteregos_cache[alterego] = alteregos_id
+                if not (superhero_id,alteregos_id) in shae_cache:
+                    cur.execute("insert into cardumen_superhero_alterego (superhero_id, alterego_id) values (%s, %s)", [superhero_id, alteregos_id])
+                    shae_cache[(superhero_id, alteregos_id)] = True
         
         # iv. Para cada ocupación/oficio (asuma que estan separadas por “,” o “;”)
             # A. Elimine espacios blancos al comienzo y al final, y comillas dobles.
@@ -108,7 +118,7 @@ with open('data.csv') as cvsfile:
                     work_occupation_id = cur.fetchone()[0]
                     work_occupation_cache[_i] = work_occupation_id
                 if not (superhero_id,work_occupation_id) in shwo_cache:
-                    cur.execute("insert into cardumen_superhero_workOcupation (superhero_id, workOcupation_id) values (%s, %s)", [superhero_id, work_occupation_id])
+                    cur.execute("insert into cardumen_superhero_workoccupation (superhero_id, workoccupation_id) values (%s, %s)", [superhero_id, work_occupation_id])
                     shwo_cache[(superhero_id, work_occupation_id)] = True
     
     conn.commit()
