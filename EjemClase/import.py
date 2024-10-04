@@ -71,7 +71,7 @@ with open('./Anime.csv') as csvfile:
                 actor_id = actor_cache[actor] if actor in actor_cache else None
                 if not actor_id:
                     cur.execute("insert into voice_actor (name) values (%s) returning id", [actor])
-                    actor_id = cur.fetchone()[0]
+                    actor_id = cur.fetchoe()[0]
                     actor_cache[actor] = actor_id
 
                 #creamos la relacion entre anime, actor y character
