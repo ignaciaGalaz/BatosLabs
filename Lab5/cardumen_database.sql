@@ -1,28 +1,28 @@
-create table if not exists superheores.cardumen_superhero(
+create table if not exists cardumen_superhero(
 	id serial primary key,
 	name varchar(255) not null,
-	height integer,
-	weight integer
+	height integer not null, 
+	weight integer not null
 );
 
-create table if not exists superheores.cardumen_character(
+create table if not exists cardumen_character(
 	superhero_id serial primary key,
-	biography_name varchar(255),
+	biography_name varchar(255) not null,
 	foreign key (superhero_id) references cardumen_superhero(id)
 	
 );
 
-create table if not exists superheores.cardumen_alterego(
+create table if not exists cardumen_alterego(
 	id serial primary key,
 	name varchar(255)
 );
 
-create table if not exists superheores.cardumen_workOccupation(
+create table if not exists cardumen_workOccupation(
 	id serial primary key,
 	name varchar(255)
 );
 
-create table if not exists superheores.cardumen_superheroe_alterego(
+create table if not exists cardumen_superhero_alterego(
     superhero_id bigint not null,
     alterego_id bigint not null,
     primary key (superhero_id, alterego_id),
@@ -30,10 +30,10 @@ create table if not exists superheores.cardumen_superheroe_alterego(
     foreign key (alterego_id) references cardumen_alterego(id)
 )
 
-create table if not exists superheores.cardumen_superheroe_workOcupation(
+create table if not exists cardumen_superhero_workOccupation(
     superhero_id bigint not null,
-    workOcupation_id bigint not null,
-    primary key (superhero_id, workOcupation_id),
+    workOccupation_id bigint not null,
+    primary key (superhero_id, workOccupation_id),
     foreign key (superhero_id) references cardumen_superhero(id),
-    foreign key (workOcupation_id) references cardumen_workOccupation(id)
+    foreign key (workOccupation_id) references cardumen_workOccupation(id)
 )

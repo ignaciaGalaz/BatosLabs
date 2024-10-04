@@ -6,14 +6,13 @@ conn = psycopg2.connect(host="localhost", user="matiastoro", database="anime", p
 
 cur = conn.cursor()
 
+# Borra todos los datos que ya existan en las tablas
 cur.execute("truncate table studio restart identity cascade")
 cur.execute("truncate table anime restart identity cascade")
 cur.execute("truncate table character restart identity cascade")
 cur.execute("truncate table voice_actor restart identity cascade")
 cur.execute("truncate table tag restart identity cascade")
 cur.execute("truncate table anime_tag restart identity cascade")
-
-
 
 studio_cache = {}
 character_cache = {}
@@ -23,16 +22,19 @@ tag_cache = {}
 at_cache = {}
 
 with open('./Anime.csv') as csvfile:
+    #delimeter: indica el caracter que se usa para separar columnas en el csv
+    #quotechar: indica que se usan "" para definir cada valor
     reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+    
     i = 0
     for row in reader:
         i +=1 
         if i == 1:
-            continue
+            continue #para que ignore la cabecera de la tabla
         #if i>3:
         #    break
         print(i)
-        name = row[1]
+        name = row[1] 
         episode = row[4].split(".")[0] if row[4] else None
         #print(f"name: {name} episode: {episode}")
 
@@ -46,8 +48,8 @@ with open('./Anime.csv') as csvfile:
             studio_cache[studio] = studio_id
         #print(studio_id)
 
-        cur.execute("insert into anime (name, episodes, studio_id) values (%s, %s, %s) returning id", [name, episode, studio_id])
-        anime_id = cur.fetchone()[0]
+        cur.execute("insert into anime (name, episodes, studio_id) values (%s, %s, %s) returning id", [name, episode, studio_id]) #retorna el id
+        anime_id = cur.fetchone()[0] #agarra lo que retorna la insercion
 
         voice_actors = row[15].strip()
         #print(voice_actors)
