@@ -48,7 +48,7 @@ with open('data.csv') as cvsfile:
         alteregos = [s.strip() for s in re.split(r'[;,]', row[9].replace('"', ''))] if row[9] != "No alter egos found." else None
         
         # (!!) pesos y alturas con valor 0
-        height = row[18].strip() # altura en centimetros, FALTA CONSIDERAR VACIOS
+        height = row[18].strip() if row[18]!='' else "0" # altura en centimetros, FALTA CONSIDERAR VACIOS
         weight = row[20].strip() 
         if height.count("meters") == 1:
             height = height.replace(' meters', '').strip()
@@ -58,7 +58,7 @@ with open('data.csv') as cvsfile:
             height = height.replace(' cm', '')
         
         if weight.count("tons") == 1:
-            weight = weight.replace(' tons', '')
+            weight = weight.replace(' tons', '').replace(',','')
             weight = str(int(weight)*1000)
         else:
             weight = weight.replace(' kg', '')
@@ -75,9 +75,7 @@ with open('data.csv') as cvsfile:
         print("   peso:", weight)
         print("   altura:", height)
         print("   work occupation:", work_occupation)
-
-        print(type(weight)==str)
-        print(type(height)==str)
+        print()
 
         ## INSERTAMOS EN LA TABLA IMAGINARIA
         # i. Inserte el superhero, obteniendo su id.
