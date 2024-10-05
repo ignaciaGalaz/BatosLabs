@@ -35,8 +35,6 @@ with open('data.csv') as cvsfile:
         #if i>35:
         #    break
 
-        print(i-1, end=" ")
-
         # OBTENEMOS LOS DATOS DEL CSV
         # None en cualquier dato que no se entregue
 
@@ -63,19 +61,17 @@ with open('data.csv') as cvsfile:
         else:
             weight = weight.replace(' kg', '')
         
-        # hace lo mismo que alter egos
-        # algunos están escritos como '(former) trabajo' y otros como 'former trabajo'
         # Ocupación
         work_occupation = [s.strip().lower() for s in re.split(r'[;,]', row[23].replace('"', ''))] if row[23] != "-" else None
 
         #----------para comprobar que está funcionando----------------------
-        print(f"name: {superhero}, biography name: {full_name}")
-
-        print("   alteregos:", alteregos)
-        print("   peso:", weight)
-        print("   altura:", height)
-        print("   work occupation:", work_occupation)
-        print()
+        #print(i-1, end=" ")
+        #print(f"name: {superhero}, biography name: {full_name}")
+        #print("   alteregos:", alteregos)
+        #print("   peso:", weight)
+        #print("   altura:", height)
+        #print("   work occupation:", work_occupation)
+        #print()
         #-------------------------------------------------------------------
 
         ## INSERTAMOS EN LA TABLA
