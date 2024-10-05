@@ -1,3 +1,4 @@
+# Integrantes: Camilo Álvarez, Ignacia Galaz A., Javier Lobos
 import psycopg2
 import psycopg2.extras
 import csv

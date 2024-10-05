@@ -1,3 +1,9 @@
+Integrantes:
+- Camilo Álvarez
+- Ignacia Galaz A.
+- Javier Lobos
+
+TABLAS SQL:
 create table if not exists cardumen_superhero(
 	id serial primary key,
 	name varchar(255) not null,
@@ -37,3 +43,9 @@ create table if not exists cardumen_superhero_workOccupation(
     foreign key (superhero_id) references cardumen_superhero(id),
     foreign key (workOccupation_id) references cardumen_workOccupation(id)
 );
+
+CONSULTAS:
+SELECT name,weight FROM cardumen_superhero ORDER BY weight DESC FETCH FIRST 10 ROWS ONLY;
+SELECT name, biography_name,height FROM cardumen_character JOIN cardumen_superhero ON id=superhero_id  ORDER BY height DESC FETCH FIRST 10 ROWS ONLY;
+SELECT name, COUNT(*) AS count FROM cardumen_superhero_workoccupation JOIN cardumen_workoccupation ON id=workoccupation_id GROUP BY name ORDER BY count DESC FETCH FIRST 10 ROWS ONLY;
+
